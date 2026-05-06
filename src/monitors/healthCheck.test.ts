@@ -58,6 +58,20 @@ describe('performHealthCheck', () => {
       })
     );
   });
+
+  // Personal note: 503 is a common status for services under maintenance;
+  // worth testing explicitly to make sure it's treated as "down".
+  it('returns status "down" for 503 Service Unavailable', async () => {
+    mockedAxios.mockResolvedValueOnce({ status: 503, data: {} } as any);
+
+    const result = await performHealthCheck({
+      url: 'https://example.com',
+      expectedStatus: 200,
+    });
+
+    expect(result.status).toBe('down');
+    expect(result.statusCode).toBe(503);
+  });
 });
 
 describe('performBatchHealthChecks', () => {
