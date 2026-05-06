@@ -19,7 +19,7 @@ export interface HealthCheckResult {
 export async function performHealthCheck(
   config: HealthCheckConfig
 ): Promise<HealthCheckResult> {
-  const { url, timeout = 5000, expectedStatus = 200, headers = {} } = config;
+  const { url, timeout = 10000, expectedStatus = 200, headers = {} } = config;
   const start = Date.now();
 
   const requestConfig: AxiosRequestConfig = {
@@ -37,7 +37,9 @@ export async function performHealthCheck(
 
     let status: HealthCheckResult['status'];
     if (statusCode === expectedStatus) {
-      status = responseTimeMs > timeout * 0.8 ? 'degraded' : 'up';
+      // Consider a response degraded if it takes more than 50% of the timeout
+      // (original used 80% which felt too lenient for catching slow responses)
+      status = responseTimeMs > timeout * 0.5 ? 'degraded' : 'up';
     } else {
       status = 'down';
     }
