@@ -86,21 +86,21 @@ describe('performHealthCheck', () => {
     expect(result.status).toBe('down');
     expect(result.statusCode).toBe(401);
   });
+
+  // Personal note: ECONNREFUSED is the error you get when nothing is listening
+  // on the target port. Good to verify it surfaces cleanly as "down" with the
+  // right error message rather than an unhandled rejection.
+  it('returns status "down" with error message on ECONNREFUSED', async () => {
+    mockedAxios.mockRejectedValueOnce(new Error('connect ECONNREFUSED 127.0.0.1:8080'));
+
+    const result = await performHealthCheck({ url: 'http://localhost:8080' });
+
+    expect(result.status).toBe('down');
+    expect(result.error).toBe('connect ECONNREFUSED 127.0.0.1:8080');
+    expect(result.statusCode).toBeUndefined();
+  });
 });
 
 describe('performBatchHealthChecks', () => {
   it('returns results for all provided configs', async () => {
-    mockedAxios
-      .mockResolvedValueOnce({ status: 200, data: {} } as any)
-      .mockResolvedValueOnce({ status: 503, data: {} } as any);
-
-    const results = await performBatchHealthChecks([
-      { url: 'https://service-a.com' },
-      { url: 'https://service-b.com' },
-    ]);
-
-    expect(results).toHaveLength(2);
-    expect(results[0].status).toBe('up');
-    expect(results[1].status).toBe('down');
-  });
-});
+    mockedA
