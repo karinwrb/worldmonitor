@@ -72,6 +72,20 @@ describe('performHealthCheck', () => {
     expect(result.status).toBe('down');
     expect(result.statusCode).toBe(503);
   });
+
+  // Personal note: 401 Unauthorized is worth catching explicitly — useful for
+  // detecting expired API keys or misconfigured auth on monitored services.
+  it('returns status "down" for 401 Unauthorized', async () => {
+    mockedAxios.mockResolvedValueOnce({ status: 401, data: {} } as any);
+
+    const result = await performHealthCheck({
+      url: 'https://example.com',
+      expectedStatus: 200,
+    });
+
+    expect(result.status).toBe('down');
+    expect(result.statusCode).toBe(401);
+  });
 });
 
 describe('performBatchHealthChecks', () => {
