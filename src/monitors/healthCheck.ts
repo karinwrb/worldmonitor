@@ -19,7 +19,7 @@ export interface HealthCheckResult {
 export async function performHealthCheck(
   config: HealthCheckConfig
 ): Promise<HealthCheckResult> {
-  const { url, timeout = 10000, expectedStatus = 200, headers = {} } = config;
+  const { url, timeout = 5000, expectedStatus = 200, headers = {} } = config;
   const start = Date.now();
 
   const requestConfig: AxiosRequestConfig = {
